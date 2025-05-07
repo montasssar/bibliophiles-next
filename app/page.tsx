@@ -1,19 +1,60 @@
-// app/page.tsx
-import Link from 'next/link';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Bibliophiles | Thoughts & Pen',
-  description: 'Sign up to read or write all that’s on your mind.',
-};
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import SearchBar from '@/components/layout/SearchBar';
+import BookCard from '@/components/books/BookCard';
+import { useSearchBooks } from '@/hooks/useSearchBooks';
 
 export default function LandingPage() {
+  const [query, setQuery] = useState('');
+  const { books, loading, error } = useSearchBooks(query);
+  const handleClear = () => setQuery('');
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-red-50 px-4">
-      <div className="max-w-2xl w-full bg-white shadow-xl rounded-2xl p-10 text-center space-y-6">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 tracking-tight">
-          Bibliophiles
-        </h1>
+    <main className="min-h-screen bg-gradient-to-b from-white to-red-50 flex flex-col items-center pb-16">
+      {/* 🔍 Search over Hero Image */}
+      <div className="w-full px-4 relative">
+        <div className="w-full max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-xl relative h-[600px]">
+          <Image
+            src="/images/landing-bookshelf.png"
+            alt="Bookshelf"
+            fill
+            className="object-cover w-full h-full"
+            priority
+          />
+
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-start pt-16 px-4 overflow-y-auto">
+            <SearchBar value={query} onChange={setQuery} onClear={handleClear} />
+
+            {query && (
+              <div className="w-full max-w-6xl mt-10 text-center">
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-6 drop-shadow-md">Search Results</h2>
+
+                {loading && <p className="text-white text-sm">Searching...</p>}
+                {error && <p className="text-red-300 text-sm">Error: {error}</p>}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {books.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      saved={false}
+                      toggleSave={() => {}}
+                      showReadLink={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 📝 Call-to-Action */}
+      <div className="mt-20 max-w-2xl w-full bg-white shadow-xl rounded-2xl p-10 text-center space-y-6 mx-4">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 tracking-tight">Bibliophiles</h1>
         <p className="text-zinc-700 text-lg md:text-xl">
           SIGN UP TO READ OR WRITE ALL WHAT'S ON YOUR MIND.
         </p>
