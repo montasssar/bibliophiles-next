@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 
 interface Book {
   id: string;
@@ -19,11 +20,14 @@ export function useSearchBooks(query: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Debounced query (500ms delay)
+  const [debouncedQuery] = useDebounce(query, 500);
+
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchBooks = async () => {
-      if (!query || query.trim().length < 2) {
+      if (!debouncedQuery || debouncedQuery.trim().length < 2) {
         setBooks([]);
         return;
       }
@@ -33,7 +37,7 @@ export function useSearchBooks(query: string) {
 
       try {
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10`,
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(debouncedQuery)}&maxResults=10`,
           { signal: controller.signal }
         );
 
@@ -41,13 +45,8 @@ export function useSearchBooks(query: string) {
         const data = await res.json();
         setBooks(data.items || []);
       } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') {
-          // Expected: fetch was aborted (e.g. query changed quickly)
-          return;
-        }
-        if (err instanceof Error) {
-          setError(err.message);
-        }
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (err instanceof Error) setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -55,7 +54,7 @@ export function useSearchBooks(query: string) {
 
     fetchBooks();
     return () => controller.abort();
-  }, [query]);
+  }, [debouncedQuery]);
 
   return { books, loading, error };
 }
