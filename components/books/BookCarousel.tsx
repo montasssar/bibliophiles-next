@@ -2,16 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
-
-interface Book {
-  id: string;
-  volumeInfo: {
-    title: string;
-    authors?: string[];
-    imageLinks?: { thumbnail?: string };
-    previewLink?: string;
-  };
-}
+import { Book } from '@/lib/normalizeBook';
 
 interface BookCarouselProps {
   books: Book[];
@@ -29,22 +20,19 @@ export default function BookCarousel({
   const loaderRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Infinite scroll detection
+  // Infinite scroll trigger
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          onLoadMore();
-        }
-      },
-      { threshold: 1 }
-    );
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loading) {
+        onLoadMore();
+      }
+    });
 
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [loading, onLoadMore]);
 
-  // Prevent vertical scroll bubbling
+  // Smooth horizontal scroll with vertical scroll prevention
   useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
@@ -63,19 +51,13 @@ export default function BookCarousel({
   return (
     <div
       ref={carouselRef}
-      className="carousel-container flex gap-6 px-4 py-6 snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-hide"
-      style={{
-        touchAction: 'pan-x',
-        overscrollBehavior: 'contain',
-        maxHeight: '360px', // ✅ constrain height
-      }}
-      role="region"
-      aria-label="Book Carousel"
+      className="flex gap-6 px-4 py-6 snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-hide"
+      style={{ touchAction: 'pan-x', overscrollBehavior: 'contain' }}
     >
       {books.map((book) => (
         <div
           key={book.id}
-          className="book-card snap-start min-w-[160px] max-w-[160px] flex-shrink-0 flex flex-col items-center"
+          className="snap-start min-w-[160px] max-w-[160px] flex-shrink-0 flex flex-col items-center"
         >
           <div className="w-[160px] h-[240px] bg-gray-100 rounded-lg shadow-md overflow-hidden relative flex items-center justify-center">
             <Image
@@ -84,15 +66,19 @@ export default function BookCarousel({
               fill
               sizes="160px"
               className="object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/fallback-image.png';
-              }}
             />
           </div>
           <h3 className="text-sm mt-2 font-medium text-center line-clamp-2 max-w-full">
             {book.volumeInfo.title}
           </h3>
+          <a
+            href={book.volumeInfo.previewLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-600 hover:underline mt-1"
+          >
+            Read Preview
+          </a>
         </div>
       ))}
 
@@ -106,6 +92,7 @@ export default function BookCarousel({
         <p className="text-red-600 w-full text-center text-sm">Error: {error}</p>
       )}
 
+      {/* Invisible loader trigger for IntersectionObserver */}
       <div ref={loaderRef} style={{ minWidth: '1px', visibility: 'hidden' }} />
     </div>
   );

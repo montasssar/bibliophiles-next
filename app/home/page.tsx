@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
-import BookCarousel from '@/components/books/BookCarousel';
 import SearchBar from '@/components/layout/SearchBar';
+import BookCarousel from '@/components/books/BookCarousel';
+import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
 
 export default function Page() {
   const [searchInput, setSearchInput] = useState('');
@@ -15,29 +15,26 @@ export default function Page() {
     genre: selectedGenre,
   });
 
-  const handleClear = () => setSearchInput('');
-  const handleGenreChange = (genre: string) => {
-    setSelectedGenre(genre);
-    setShowCarousel(true);
+  const handleSearchFocus = () => {
+    if (!showCarousel) setShowCarousel(true);
   };
 
   return (
-    <div className="home-page flex flex-col items-center gap-4">
-      <div className="w-full" onClick={() => setShowCarousel(true)}>
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-full" onClick={handleSearchFocus}>
         <SearchBar
           value={searchInput}
           onChange={setSearchInput}
-          onClear={handleClear}
+          onClear={() => setSearchInput('')}
         />
       </div>
 
       <select
-        onChange={(e) => handleGenreChange(e.target.value)}
+        className="border rounded px-3 py-2"
         value={selectedGenre}
-        className="genre-selector px-4 py-2 border rounded"
+        onChange={(e) => setSelectedGenre(e.target.value)}
       >
         <option value="">All Genres</option>
-        <option value="Fiction">Fiction</option>
         <option value="Fantasy">Fantasy</option>
         <option value="Science">Science</option>
         <option value="Romance">Romance</option>
