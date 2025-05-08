@@ -1,27 +1,57 @@
-// app/home/page.tsx
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Home | Bibliophiles',
-  description: 'Search books, preview them, and enjoy curated literary quotes.',
-};
+import { useState } from 'react';
+import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
+import BookCarousel from '@/components/books/BookCarousel';
+import SearchBar from '@/components/layout/SearchBar';
 
 export default function HomePage() {
-  return (
-    <section className="min-h-screen bg-white px-4 py-16">
-      <div className="max-w-6xl mx-auto space-y-12">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-red-600">Welcome to Bibliophiles</h1>
-          <p className="text-lg md:text-xl text-zinc-600">
-            Search and preview books, explore inspiring literary quotes, and build your personal library.
-          </p>
-        </div>
+  const [searchInput, setSearchInput] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [showCarousel, setShowCarousel] = useState(false);
 
-        {/* Placeholder for future content */}
-        <div className="bg-zinc-50 border border-dashed border-zinc-300 rounded-xl p-8 text-center shadow-sm text-zinc-500">
-          🚧 Search & Quote Feed Under Construction...
-        </div>
+  const { books, loading, error, loadMore } = useHomeSearchBooks({
+    query: searchInput,
+    genre: selectedGenre,
+  });
+
+  const handleClear = () => setSearchInput('');
+
+  const handleGenreChange = (genre: string) => {
+    setSelectedGenre(genre);
+    setShowCarousel(true);
+  };
+
+  return (
+    <div className="home-page flex flex-col items-center gap-4">
+      <div className="w-full" onClick={() => setShowCarousel(true)}>
+        <SearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onClear={handleClear}
+        />
       </div>
-    </section>
+
+      <select
+        onChange={(e) => handleGenreChange(e.target.value)}
+        value={selectedGenre}
+        className="genre-selector px-4 py-2 border rounded"
+      >
+        <option value="">All Genres</option>
+        <option value="Fiction">Fiction</option>
+        <option value="Fantasy">Fantasy</option>
+        <option value="Science">Science</option>
+        <option value="Romance">Romance</option>
+      </select>
+
+      {showCarousel && (
+        <BookCarousel
+          books={books}
+          loading={loading}
+          error={error}
+          onLoadMore={loadMore}
+        />
+      )}
+    </div>
   );
 }
