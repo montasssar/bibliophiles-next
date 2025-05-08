@@ -35,7 +35,11 @@ export default function Page() {
         <select
           className="border rounded px-3 py-2"
           value={selectedGenre}
-          onChange={(e) => setSelectedGenre(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSelectedGenre(value);
+            if (value) setShowCarousel(true); // ✅ Show carousel on genre select
+          }}
         >
           <option value="">All Genres</option>
           <option value="Fantasy">Fantasy</option>
