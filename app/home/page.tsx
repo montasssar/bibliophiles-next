@@ -21,6 +21,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* Search Bar */}
       <div className="w-full" onClick={handleSearchFocus}>
         <SearchBar
           value={searchInput}
@@ -29,17 +30,32 @@ export default function Page() {
         />
       </div>
 
-      <select
-        className="border rounded px-3 py-2"
-        value={selectedGenre}
-        onChange={(e) => setSelectedGenre(e.target.value)}
-      >
-        <option value="">All Genres</option>
-        <option value="Fantasy">Fantasy</option>
-        <option value="Science">Science</option>
-        <option value="Romance">Romance</option>
-      </select>
+      {/* Genre Filter + Refresh Button */}
+      <div className="flex gap-4 items-center">
+        <select
+          className="border rounded px-3 py-2"
+          value={selectedGenre}
+          onChange={(e) => setSelectedGenre(e.target.value)}
+        >
+          <option value="">All Genres</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Science">Science</option>
+          <option value="Romance">Romance</option>
+        </select>
 
+        <button
+          onClick={() => {
+            setShowCarousel(false);
+            setSearchInput('');
+            setSelectedGenre('');
+          }}
+          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {/* Book Carousel */}
       {showCarousel && (
         <div className="w-full overflow-hidden">
           <BookCarousel
