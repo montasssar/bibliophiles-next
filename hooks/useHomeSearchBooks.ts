@@ -16,7 +16,7 @@ export function useHomeSearchBooks({ query, genre }: UseHomeSearchBooksProps) {
   const [page, setPage] = useState(0);
   const [totalItems, setTotalItems] = useState<number | null>(null);
 
-  const [debouncedQuery] = useDebounce(query, 500);
+  const [debouncedQuery] = useDebounce(query, 300);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchBooks = useCallback(
@@ -28,9 +28,12 @@ export function useHomeSearchBooks({ query, genre }: UseHomeSearchBooksProps) {
       const controller = new AbortController();
       abortRef.current = controller;
 
+      const fallbackTerms = ['fiction', 'bestseller', 'novel', 'love', 'history'];
+      const randomTerm = fallbackTerms[Math.floor(Math.random() * fallbackTerms.length)];
+
       const queryParam = debouncedQuery.trim()
         ? encodeURIComponent(debouncedQuery)
-        : 'fiction';
+        : encodeURIComponent(randomTerm); //  Fresh discover
 
       const genreFilter = genre ? `+subject:${encodeURIComponent(genre)}` : '';
       const startIndex = isInfinite ? page * 10 : 0;
@@ -38,7 +41,10 @@ export function useHomeSearchBooks({ query, genre }: UseHomeSearchBooksProps) {
       try {
         const res = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=${queryParam}${genreFilter}&startIndex=${startIndex}&maxResults=10`,
-          { signal: controller.signal }
+          {
+            signal: controller.signal,
+            cache: 'no-store', // ⚡ Always fresh
+          }
         );
 
         if (!res.ok) throw new Error('Failed to fetch books');
@@ -58,11 +64,18 @@ export function useHomeSearchBooks({ query, genre }: UseHomeSearchBooksProps) {
     [debouncedQuery, genre, page]
   );
 
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchBooks(false);
+  }, []);
+
+  //  Fetch on user input
   useEffect(() => {
     setPage(0);
     fetchBooks(false);
   }, [debouncedQuery, genre]);
 
+  //Infinite pagination
   useEffect(() => {
     if (page > 0) fetchBooks(true);
   }, [page]);
