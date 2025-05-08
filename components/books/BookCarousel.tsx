@@ -20,28 +20,57 @@ interface BookCarouselProps {
   onLoadMore: () => void;
 }
 
-export default function BookCarousel({ books, loading, error, onLoadMore }: BookCarouselProps) {
+export default function BookCarousel({
+  books,
+  loading,
+  error,
+  onLoadMore,
+}: BookCarouselProps) {
   const loaderRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
+  // Infinite scroll detection
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !loading) {
-        onLoadMore();
-      }
-    }, { threshold: 1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading) {
+          onLoadMore();
+        }
+      },
+      { threshold: 1 }
+    );
 
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [loading, onLoadMore]);
 
+  // Prevent vertical scroll bubbling
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
   return (
     <div
+      ref={carouselRef}
       className="carousel-container flex gap-6 px-4 py-6 snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-hide"
-      onWheel={(e) => {
-        if (e.deltaY === 0) return;
-        e.currentTarget.scrollLeft += e.deltaY;
-        e.preventDefault();
+      style={{
+        touchAction: 'pan-x',
+        overscrollBehavior: 'contain',
+        maxHeight: '360px', // ✅ constrain height
       }}
+      role="region"
+      aria-label="Book Carousel"
     >
       {books.map((book) => (
         <div
@@ -68,11 +97,15 @@ export default function BookCarousel({ books, loading, error, onLoadMore }: Book
       ))}
 
       {loading && (
-        <p className="text-center w-full text-sm text-gray-500">Loading more books...</p>
+        <div className="min-w-[160px] h-[240px] flex items-center justify-center text-sm text-gray-500">
+          Loading more books...
+        </div>
       )}
+
       {error && (
         <p className="text-red-600 w-full text-center text-sm">Error: {error}</p>
       )}
+
       <div ref={loaderRef} style={{ minWidth: '1px', visibility: 'hidden' }} />
     </div>
   );

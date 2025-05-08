@@ -5,7 +5,7 @@ import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
 import BookCarousel from '@/components/books/BookCarousel';
 import SearchBar from '@/components/layout/SearchBar';
 
-export default function HomePage() {
+export default function Page() {
   const [searchInput, setSearchInput] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [showCarousel, setShowCarousel] = useState(false);
@@ -16,7 +16,6 @@ export default function HomePage() {
   });
 
   const handleClear = () => setSearchInput('');
-
   const handleGenreChange = (genre: string) => {
     setSelectedGenre(genre);
     setShowCarousel(true);
@@ -45,12 +44,14 @@ export default function HomePage() {
       </select>
 
       {showCarousel && (
-        <BookCarousel
-          books={books}
-          loading={loading}
-          error={error}
-          onLoadMore={loadMore}
-        />
+        <div className="w-full overflow-hidden">
+          <BookCarousel
+            books={books}
+            loading={loading}
+            error={error}
+            onLoadMore={loadMore}
+          />
+        </div>
       )}
     </div>
   );
