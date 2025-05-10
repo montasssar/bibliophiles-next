@@ -1,4 +1,3 @@
-// app/layout.tsx
 import './globals.css';
 import { ReactNode } from 'react';
 import { Inter } from 'next/font/google';
@@ -6,6 +5,7 @@ import { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/context/AuthContext';
+import ScrollToTop from '@/components/layout/ScrollToTop';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,6 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <Footer />
+          <ScrollToTop />
         </AuthProvider>
       </body>
     </html>
