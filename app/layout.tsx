@@ -4,8 +4,7 @@ import { Inter } from 'next/font/google';
 import { Metadata } from 'next';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { AuthProvider } from '@/context/AuthContext';
-import ScrollToTop from '@/components/layout/ScrollToTop';
+import ClientProviders from './client-providers'; // ✅ Client-only wrapper
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,12 +29,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth dark">
       <body className={`${inter.className} bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100`}>
-        <AuthProvider>
+        <ClientProviders>
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <Footer />
-          <ScrollToTop />
-        </AuthProvider>
+        </ClientProviders>
       </body>
     </html>
   );

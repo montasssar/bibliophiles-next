@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SearchBar from '@/components/layout/SearchBar';
 import BookCarousel from '@/components/books/BookCarousel';
+import BriefReads from '@/components/quotes/BriefReads'; // ✅ Import BriefReads
 import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
 
 export default function Page() {
@@ -19,9 +20,15 @@ export default function Page() {
     if (!showCarousel) setShowCarousel(true);
   };
 
+  const handleRefresh = () => {
+    setSearchInput('');
+    setSelectedGenre('');
+    setShowCarousel(false);
+  };
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Search Bar */}
+    <div className="flex flex-col items-center gap-6 px-4 md:px-8 max-w-5xl mx-auto pb-20">
+      {/* 🔍 Search */}
       <div className="w-full" onClick={handleSearchFocus}>
         <SearchBar
           value={searchInput}
@@ -30,15 +37,15 @@ export default function Page() {
         />
       </div>
 
-      {/* Genre Filter + Refresh Button */}
-      <div className="flex gap-4 items-center">
+      {/* 🎭 Genre Filter + Refresh */}
+      <div className="flex flex-wrap gap-4 items-center justify-between w-full">
         <select
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 dark:bg-zinc-800 dark:text-white"
           value={selectedGenre}
           onChange={(e) => {
             const value = e.target.value;
             setSelectedGenre(value);
-            if (value) setShowCarousel(true); // ✅ Show carousel on genre select
+            if (value) setShowCarousel(true);
           }}
         >
           <option value="">All Genres</option>
@@ -48,18 +55,14 @@ export default function Page() {
         </select>
 
         <button
-          onClick={() => {
-            setShowCarousel(false);
-            setSearchInput('');
-            setSelectedGenre('');
-          }}
-          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition"
+          onClick={handleRefresh}
+          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
         >
           Refresh
         </button>
       </div>
 
-      {/* Book Carousel */}
+      {/* 📚 Book Carousel */}
       {showCarousel && (
         <div className="w-full overflow-hidden">
           <BookCarousel
@@ -70,6 +73,14 @@ export default function Page() {
           />
         </div>
       )}
+
+      {/* ✨ Brief Reads Section */}
+      <div className="w-full mt-12">
+        <h2 className="text-xl font-semibold mb-4 text-zinc-800 dark:text-zinc-100">
+          Brief Reads
+        </h2>
+        <BriefReads />
+      </div>
     </div>
   );
 }
