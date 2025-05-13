@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { GET_BRIEFREADS } from '@/services/queries';
+import { useDebounce } from 'use-debounce';
 
 interface Quote {
   id: string;
@@ -24,6 +25,9 @@ interface UseQuotesResult {
   loadMore: () => void;
 }
 
+type CacheKey = string;
+type QuoteCache = Map<CacheKey, Quote[]>;
+
 export default function useQuotes(): UseQuotesResult {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [page, setPage] = useState(1);
@@ -34,7 +38,13 @@ export default function useQuotes(): UseQuotesResult {
   const [selectedAuthor, setSelectedAuthorState] = useState('');
   const [search, setSearch] = useState('');
 
+  const [debouncedTag] = useDebounce(selectedTag, 300);
+  const [debouncedAuthor] = useDebounce(selectedAuthor, 300);
+  const [debouncedSearch] = useDebounce(search, 300);
+
   const shownQuoteIds = useRef(new Set<string>());
+  const isFetchingRef = useRef(false);
+  const quoteCache = useRef<QuoteCache>(new Map());
 
   const [fetchQuotes] = useLazyQuery(GET_BRIEFREADS, {
     fetchPolicy: 'no-cache',
@@ -44,53 +54,81 @@ export default function useQuotes(): UseQuotesResult {
     },
   });
 
-  const reset = () => {
+  const makeCacheKey = useCallback(
+    (page: number): CacheKey =>
+      `tag=${debouncedTag}|author=${debouncedAuthor}|search=${debouncedSearch}|page=${page}`,
+    [debouncedTag, debouncedAuthor, debouncedSearch]
+  );
+
+  const reset = useCallback(() => {
     setQuotes([]);
     setPage(1);
     shownQuoteIds.current.clear();
     setError(null);
-  };
+  }, []);
 
   const fetch = useCallback(
-    async (pageNum: number) => {
-      setLoading(true);
+    async (pageNum: number, isPrefetch = false) => {
+      const key = makeCacheKey(pageNum);
+      const cached = quoteCache.current.get(key);
+
+      if (cached && !isPrefetch) {
+        const unique = cached.filter((q) => !shownQuoteIds.current.has(q.id));
+        unique.forEach((q) => shownQuoteIds.current.add(q.id));
+        setQuotes((prev) => [...prev, ...unique]);
+        return;
+      }
+
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
+      if (!isPrefetch) setLoading(true);
+
       try {
         const { data } = await fetchQuotes({
           variables: {
-            tag: selectedTag,
-            author: selectedAuthor,
-            search,
+            tag: debouncedTag,
+            author: debouncedAuthor,
+            search: debouncedSearch,
             page: pageNum,
             limit: 6,
           },
         });
 
         const incoming: Quote[] = data?.briefReads || [];
+        quoteCache.current.set(key, incoming);
 
-        const unique = incoming.filter((q) => !shownQuoteIds.current.has(q.id));
-        unique.forEach((q) => shownQuoteIds.current.add(q.id));
+        if (!isPrefetch) {
+          const unique = incoming.filter((q) => !shownQuoteIds.current.has(q.id));
+          unique.forEach((q) => shownQuoteIds.current.add(q.id));
+          setQuotes((prev) => [...prev, ...unique]);
+        }
 
-        setQuotes((prev) => [...prev, ...unique]);
-      } catch (err) {
-        console.warn('⚠️ Fallback used:', err);
-        setError('Could not load quotes.');
+        // Prefetch next page if current page succeeded
+        if (!isPrefetch && incoming.length > 0) {
+          fetch(pageNum + 1, true);
+        }
+      } catch {
+        if (!isPrefetch) {
+          setError('Could not load quotes.');
+        }
       } finally {
-        setLoading(false);
+        if (!isPrefetch) setLoading(false);
+        isFetchingRef.current = false;
       }
     },
-    [selectedTag, selectedAuthor, search, fetchQuotes]
+    [makeCacheKey, fetchQuotes, debouncedTag, debouncedAuthor, debouncedSearch]
   );
 
   useEffect(() => {
     reset();
     fetch(1);
-  }, [selectedTag, selectedAuthor, search, fetch]);
+  }, [debouncedTag, debouncedAuthor, debouncedSearch, fetch, reset]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     const nextPage = page + 1;
     setPage(nextPage);
     fetch(nextPage);
-  };
+  }, [page, fetch]);
 
   const setSelectedTag = (tag: string) => {
     setSelectedTagState(tag);
