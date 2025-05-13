@@ -16,11 +16,12 @@ interface MoodSelectorProps {
 const moods = [
   { label: 'All Moods', tag: '' },
   { label: 'Inspiration ✨', tag: 'inspirational' },
-  { label: 'Philosophy 🧠', tag: 'wisdom|philosophy' },
-  { label: 'Romantic 💘', tag: 'love|poetry' },
-  { label: 'Literary 📚', tag: 'literature|truth' },
-  { label: 'Life 🌱', tag: 'life|motivational' },
+  { label: 'Philosophy 🧠', tag: 'wisdom,philosophy' },
+  { label: 'Romantic 💘', tag: 'love,poetry' },
+  { label: 'Literary 📚', tag: 'literature,truth' },
+  { label: 'Life 🌱', tag: 'life,motivational' },
 ];
+
 
 export default function MoodSelector({
   selectedTag,
