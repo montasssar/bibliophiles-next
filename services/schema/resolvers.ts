@@ -20,9 +20,12 @@ function filterAndPaginateFallback({
 }: FilterArgs): Quote[] {
   let filtered = quotes as Quote[];
 
-  if (tag) {
+  // ✅ Normalize comma-separated tags to an array
+  const tagList = tag?.split(',').map((t) => t.trim().toLowerCase());
+
+  if (tagList?.length) {
     filtered = filtered.filter((q) =>
-      q.tags?.some((t) => t.toLowerCase().includes(tag.toLowerCase()))
+      q.tags?.some((t) => tagList.includes(t.toLowerCase()))
     );
   }
 
