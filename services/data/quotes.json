@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q1",
+    "text": "The unexamined life is not worth living.",
+    "author": "Socrates",
+    "tags": ["philosophy", "life"]
+  },
+  {
+    "id": "q2",
+    "text": "In the middle of difficulty lies opportunity.",
+    "author": "Albert Einstein",
+    "tags": ["inspirational", "life"]
+  },
+  {
+    "id": "q3",
+    "text": "Do not go gentle into that good night.",
+    "author": "Dylan Thomas",
+    "tags": ["poetry", "death"]
+  },
+  {
+    "id": "q4",
+    "text": "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+    "author": "Ralph Waldo Emerson",
+    "tags": ["individuality", "wisdom"]
+  },
+  {
+    "id": "q5",
+    "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "author": "Winston Churchill",
+    "tags": ["motivational", "resilience"]
+  },
+  {
+    "id": "q6",
+    "text": "All that we see or seem is but a dream within a dream.",
+    "author": "Edgar Allan Poe",
+    "tags": ["poetry", "mystery"]
+  },
+  {
+    "id": "q7",
+    "text": "Not all those who wander are lost.",
+    "author": "J.R.R. Tolkien",
+    "tags": ["adventure", "literature"]
+  },
+  {
+    "id": "q8",
+    "text": "You miss 100% of the shots you don’t take.",
+    "author": "Wayne Gretzky",
+    "tags": ["sports", "inspiration"]
+  },
+  {
+    "id": "q9",
+    "text": "If you want to go fast, go alone. If you want to go far, go together.",
+    "author": "African Proverb",
+    "tags": ["wisdom", "collaboration"]
+  },
+  {
+    "id": "q10",
+    "text": "The only limit to our realization of tomorrow is our doubts of today.",
+    "author": "Franklin D. Roosevelt",
+    "tags": ["hope", "inspirational"]
+  }
+]

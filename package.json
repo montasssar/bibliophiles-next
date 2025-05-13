@@ -6,17 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fix:quotes": "ts-node scripts/fixQuotes.ts",
+    "server": "ts-node services/server.ts",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
     "apollo-server-express": "^3.13.0",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "firebase": "^11.7.1",
     "framer-motion": "^12.10.5",
     "graphql": "^16.11.0",
     "next": "15.3.1",
+    "node-fetch": "^2.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
@@ -25,15 +30,18 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/axios": "^0.9.36",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
-  "description": "**Bibliophiles** is a modern literary platform built with Next.js 14 and TypeScript.   It allows users to search and preview books, explore quotes and manage a personal library.",
+  "description": "**Bibliophiles** is a modern literary platform built with Next.js 14 and TypeScript. It allows users to search and preview books, explore quotes and manage a personal library.",
   "main": "index.js",
   "directories": {
     "lib": "lib"
