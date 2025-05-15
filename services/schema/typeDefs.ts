@@ -15,6 +15,7 @@ export const typeDefs = gql`
       search: String
       page: Int
       limit: Int
+      matchAll: Boolean
     ): [Quote!]!
   }
 `;

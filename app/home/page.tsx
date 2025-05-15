@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import SearchBar from '@/components/layout/SearchBar';
 import BookCarousel from '@/components/books/BookCarousel';
-import BriefReads from '@/components/quotes/BriefReads'; // ✅ Import BriefReads
+import BriefReads from '@/components/quotes/BriefReads';
 import { useHomeSearchBooks } from '@/hooks/useHomeSearchBooks';
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const moodParam = searchParams.get('mood') || '';
+
   const [searchInput, setSearchInput] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [showCarousel, setShowCarousel] = useState(false);
@@ -25,6 +29,13 @@ export default function Page() {
     setSelectedGenre('');
     setShowCarousel(false);
   };
+
+  useEffect(() => {
+    if (moodParam) {
+      // You can forward this to BriefReads via context or props if needed
+      console.log('Selected mood from URL:', moodParam);
+    }
+  }, [moodParam]);
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 md:px-8 max-w-5xl mx-auto pb-20">

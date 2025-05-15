@@ -4,13 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { GET_BRIEFREADS } from '@/services/queries';
 import { useDebounce } from 'use-debounce';
-
-interface Quote {
-  id: string;
-  text: string;
-  author: string;
-  tags: string[];
-}
+import { Quote } from '../services/types/Quote';
 
 interface UseQuotesResult {
   quotes: Quote[];
@@ -22,6 +16,8 @@ interface UseQuotesResult {
   setSelectedAuthor: (author: string) => void;
   search: string;
   setSearch: (val: string) => void;
+  matchAll: boolean;
+  setMatchAll: (val: boolean) => void;
   loadMore: () => void;
 }
 
@@ -37,10 +33,12 @@ export default function useQuotes(): UseQuotesResult {
   const [selectedTag, setSelectedTagState] = useState('');
   const [selectedAuthor, setSelectedAuthorState] = useState('');
   const [search, setSearch] = useState('');
+  const [matchAll, setMatchAll] = useState(false);
 
   const [debouncedTag] = useDebounce(selectedTag, 300);
   const [debouncedAuthor] = useDebounce(selectedAuthor, 300);
   const [debouncedSearch] = useDebounce(search, 300);
+  const [debouncedMatchAll] = useDebounce(matchAll, 300);
 
   const shownQuoteIds = useRef(new Set<string>());
   const isFetchingRef = useRef(false);
@@ -56,8 +54,8 @@ export default function useQuotes(): UseQuotesResult {
 
   const makeCacheKey = useCallback(
     (page: number): CacheKey =>
-      `tag=${debouncedTag}|author=${debouncedAuthor}|search=${debouncedSearch}|page=${page}`,
-    [debouncedTag, debouncedAuthor, debouncedSearch]
+      `tag=${debouncedTag}|author=${debouncedAuthor}|search=${debouncedSearch}|matchAll=${debouncedMatchAll}|page=${page}`,
+    [debouncedTag, debouncedAuthor, debouncedSearch, debouncedMatchAll]
   );
 
   const reset = useCallback(() => {
@@ -86,11 +84,12 @@ export default function useQuotes(): UseQuotesResult {
       try {
         const { data } = await fetchQuotes({
           variables: {
-            tag: debouncedTag,
-            author: debouncedAuthor,
-            search: debouncedSearch,
+            tag: debouncedTag || undefined,
+            author: debouncedAuthor || undefined,
+            search: debouncedSearch || undefined,
             page: pageNum,
             limit: 6,
+            matchAll: debouncedMatchAll,
           },
         });
 
@@ -103,26 +102,23 @@ export default function useQuotes(): UseQuotesResult {
           setQuotes((prev) => [...prev, ...unique]);
         }
 
-        // Prefetch next page if current page succeeded
         if (!isPrefetch && incoming.length > 0) {
-          fetch(pageNum + 1, true);
+          fetch(pageNum + 1, true); // Prefetch next
         }
       } catch {
-        if (!isPrefetch) {
-          setError('Could not load quotes.');
-        }
+        if (!isPrefetch) setError('Could not load quotes.');
       } finally {
         if (!isPrefetch) setLoading(false);
         isFetchingRef.current = false;
       }
     },
-    [makeCacheKey, fetchQuotes, debouncedTag, debouncedAuthor, debouncedSearch]
+    [makeCacheKey, fetchQuotes, debouncedTag, debouncedAuthor, debouncedSearch, debouncedMatchAll]
   );
 
   useEffect(() => {
     reset();
     fetch(1);
-  }, [debouncedTag, debouncedAuthor, debouncedSearch, fetch, reset]);
+  }, [debouncedTag, debouncedAuthor, debouncedSearch, debouncedMatchAll, fetch, reset]);
 
   const loadMore = useCallback(() => {
     const nextPage = page + 1;
@@ -150,6 +146,8 @@ export default function useQuotes(): UseQuotesResult {
     setSelectedAuthor,
     search,
     setSearch,
+    matchAll,
+    setMatchAll,
     loadMore,
   };
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 
 interface MoodSelectorProps {
   selectedTag: string;
@@ -22,7 +23,6 @@ const moods = [
   { label: 'Life 🌱', tag: 'life,motivational' },
 ];
 
-
 export default function MoodSelector({
   selectedTag,
   setSelectedTag,
@@ -33,6 +33,8 @@ export default function MoodSelector({
   suggestions,
   onSubmit,
 }: MoodSelectorProps) {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       {/* Mood Dropdown */}
@@ -43,11 +45,15 @@ export default function MoodSelector({
         <select
           id="mood"
           value={selectedTag}
-          onChange={(e) => setSelectedTag(e.target.value)}
+          onChange={(e) => {
+            const tag = e.target.value;
+            setSelectedTag(tag);
+            router.push(`/home?mood=${encodeURIComponent(tag)}`);
+          }}
           className="w-full p-2 border rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
         >
           {moods.map((mood) => (
-            <option key={mood.tag} value={mood.tag}>
+            <option key={mood.tag} value={mood.tag.replace(/,/g, '|')}>
               {mood.label}
             </option>
           ))}
