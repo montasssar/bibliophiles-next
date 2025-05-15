@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 'use client';
 
 import {
@@ -11,12 +10,14 @@ import {
 import {
   onAuthStateChanged,
   signOut,
+  signInWithEmailAndPassword,
   User,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 type AuthContextType = {
   currentUser: User | null;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -38,10 +39,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
   const logout = () => signOut(auth);
 
   return (
-    <AuthContext.Provider value={{ currentUser, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
