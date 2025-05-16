@@ -1,7 +1,17 @@
 import { Quote, FilterArgs } from '../types/Quote';
 import rawQuotes from '../data/quotes.json';
 
-// Define the structure of the raw data from quotes.json
+// Shuffle utility
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Normalize raw quotes
 interface RawQuote {
   Quote?: string;
   Author?: string;
@@ -11,7 +21,6 @@ interface RawQuote {
   tags?: string[];
 }
 
-// Transform the raw quotes into normalized Quote[]
 const quotes: Quote[] = (rawQuotes as RawQuote[]).map((q, index) => ({
   id: `fallback-${index}`,
   text: q.Quote || q.text || 'No quote text',
@@ -19,7 +28,7 @@ const quotes: Quote[] = (rawQuotes as RawQuote[]).map((q, index) => ({
   tags: q.Tags || q.tags || [],
 }));
 
-// Main filtering and pagination logic
+// Main logic with shuffle
 export function filterAndPaginateFallback({
   tag,
   author,
@@ -28,7 +37,7 @@ export function filterAndPaginateFallback({
   limit = 10,
   matchAll = false,
 }: FilterArgs): Quote[] {
-  let filtered = quotes;
+  let filtered = shuffleArray([...quotes]); //Always fresh on each visit
 
   if (author) {
     filtered = filtered.filter((q) =>
