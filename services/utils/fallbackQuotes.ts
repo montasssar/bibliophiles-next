@@ -1,6 +1,15 @@
-import quotes from '../data/quotes.json';
 import { Quote, FilterArgs } from '../types/Quote';
+import rawQuotes from '../data/quotes.json';
 
+// ✅ Normalize the raw quotes to match the expected Quote[] format
+const quotes: Quote[] = (rawQuotes as any[]).map((q, index) => ({
+  id: `fallback-${index}`,
+  text: q.Quote || q.text || 'No quote text',
+  author: q.Author || q.author || 'Unknown',
+  tags: q.Tags || q.tags || [],
+}));
+
+// ✅ Filter and paginate the fallback quotes
 export function filterAndPaginateFallback({
   tag,
   author,
@@ -9,7 +18,7 @@ export function filterAndPaginateFallback({
   limit = 10,
   matchAll = false,
 }: FilterArgs): Quote[] {
-  let filtered = quotes as Quote[];
+  let filtered = quotes;
 
   // ✅ Filter by author
   if (author) {
@@ -39,7 +48,7 @@ export function filterAndPaginateFallback({
     );
   }
 
-  // 🚫 DO NOT shuffle — causes infinite scroll bugs
+  // 🚫 Do not shuffle — causes infinite scroll bugs
 
   // ✅ Paginate
   const start = (page - 1) * limit;

@@ -54,7 +54,7 @@ export default function LandingPage() {
 
       {/* 📝 Call-to-Action */}
       <div className="mt-20 max-w-2xl w-full bg-white shadow-xl rounded-2xl p-10 text-center space-y-6 mx-4">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 tracking-tight">Bibliophiles</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 tracking-tight">Your warm home of words</h1>
         <p className="text-zinc-700 text-lg md:text-xl">
           SIGN UP TO READ OR WRITE ALL WHAT'S ON YOUR MIND.
         </p>
