@@ -1,5 +1,10 @@
+// lib/firebase.ts
+
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+// Optional: if you plan to use Firebase Storage later
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -10,5 +15,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
+// Ensure singleton pattern (important in Next.js hot reloads)
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// Export shared Firebase services
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app); // Only needed if you upload files
