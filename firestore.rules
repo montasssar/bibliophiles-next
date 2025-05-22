@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // POSTS: Community writing posts
+    match /posts/{postId} {
+
+      // Anyone can read approved posts
+      allow read: if resource.data.status == "approved";
+
+      // Only signed-in users can create posts
+      allow create: if request.auth != null;
+
+      // Only the author can delete their own post, if not approved yet
+      allow delete: if request.auth != null &&
+                    request.auth.uid == resource.data.authorId &&
+                    resource.data.status == "pending";
+
+      // Only admins can update (e.g., approve or reject)
+      allow update: if request.auth.token.admin == true;
+    }
+
+    // Optional: Protect users collection (if used)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
