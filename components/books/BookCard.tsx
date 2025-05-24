@@ -4,6 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FiHeart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
+import { useAuth } from '@/context/AuthContext';
+import { db } from '@/lib/firebase';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { useState } from 'react';
 
 interface BookCardProps {
   book: {
@@ -18,12 +22,35 @@ interface BookCardProps {
     };
   };
   saved: boolean;
-  toggleSave: () => void;
+  toggleSave?: () => void;
   showReadLink?: boolean;
 }
 
 export default function BookCard({ book, saved, toggleSave, showReadLink }: BookCardProps) {
+  const { currentUser } = useAuth();
   const { title, authors, imageLinks, previewLink } = book.volumeInfo;
+  const [isSaved, setIsSaved] = useState(saved);
+
+  const handleToggle = async () => {
+    if (!currentUser) return;
+
+    const ref = doc(db, 'users', currentUser.uid, 'savedBooks', book.id);
+
+    if (isSaved) {
+      await deleteDoc(ref);
+    } else {
+      await setDoc(ref, {
+        id: book.id,
+        title,
+        author: authors?.[0] || 'Unknown',
+        coverImageUrl: imageLinks?.thumbnail || '',
+        dateSaved: new Date().toISOString(),
+      });
+    }
+
+    setIsSaved(!isSaved);
+    toggleSave?.();
+  };
 
   return (
     <div
@@ -31,7 +58,6 @@ export default function BookCard({ book, saved, toggleSave, showReadLink }: Book
       role="group"
       aria-label={`Book card for ${title}`}
     >
-      {/* Cover */}
       {imageLinks?.thumbnail ? (
         <div className="relative w-full h-48 rounded-md overflow-hidden mb-2">
           <Image
@@ -51,7 +77,6 @@ export default function BookCard({ book, saved, toggleSave, showReadLink }: Book
         </div>
       )}
 
-      {/* Title & Author */}
       <div className="flex-grow">
         <h3 className="text-sm font-semibold text-zinc-800 leading-snug mb-1 line-clamp-2">
           {title}
@@ -62,7 +87,6 @@ export default function BookCard({ book, saved, toggleSave, showReadLink }: Book
         </p>
       </div>
 
-      {/* Actions */}
       <div className="flex justify-between items-center mt-auto">
         {showReadLink && previewLink && (
           <Link
@@ -77,11 +101,11 @@ export default function BookCard({ book, saved, toggleSave, showReadLink }: Book
         )}
 
         <button
-          onClick={toggleSave}
-          aria-label={saved ? `Unsave ${title}` : `Save ${title}`}
+          onClick={handleToggle}
+          aria-label={isSaved ? `Unsave ${title}` : `Save ${title}`}
           className="text-red-500 hover:text-red-600 text-xl transition"
         >
-          {saved ? <FaHeart /> : <FiHeart />}
+          {isSaved ? <FaHeart /> : <FiHeart />}
         </button>
       </div>
     </div>
